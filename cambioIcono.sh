@@ -29,33 +29,27 @@ fi
 # Obtener el nombre del archivo sin la extensión
 app_name=$(basename "$app_file" .desktop)
 
-# Obtener la ruta de la aplicación y ejecutarla
-app_path=$(grep -oP '(?<=^Exec=).*' "$app_file" | sed 's/%.//g;s/ .*$//g')
-eval "$app_path" &>/dev/null & disown
-
 # Pedir al usuario que seleccione un archivo de imagen
 img_file=$(zenity --file-selection --title="Seleccionar archivo de imagen para icono" --file-filter="Imágenes png|*.png")
 
+# Escalar la imagen a 32x32
+convert "$img_file" -resize 32x32! "$img_file"
+
 # Obtener la ruta del archivo .desktop de la aplicación
-desktop_file=$(grep -r -l "$app_path" /usr/share/applications | head -n 1)
+desktop_file=$(grep -r -l "Exec=$app_name" /usr/share/applications | head -n 1)
+
+if [ -z "$desktop_file" ]; then
+    zenity --error --title="Error" --text="No se pudo encontrar el archivo .desktop de la aplicación."
+    exit 1
+fi
 
 # Obtener la clave de gsettings para el icono de la aplicación
 gsettings_key=$(grep -oP '(?<=Icon=).*' "$desktop_file")
 
+if [ -z "$gsettings_key" ]; then
+    zenity --error --title="Error" --text="No se pudo encontrar la clave de gsettings para el icono de la aplicación."
+    exit 1
+fi
+
 # Establecer el nuevo icono con gsettings
-gsettings set org.gnome.desktop.interface icon-theme 'Adwaita'
-gsettings set org.gnome.desktop.interface icon-theme 'gnome'
-gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-dark'
-gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-light'
-gsettings set org.gnome.desktop.interface icon-theme 'Humanity-Dark'
-gsettings set org.gnome.desktop.interface icon-theme 'Humanity'
-
-gsettings set org.gnome.desktop.interface icon-theme 'gnome'
-gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-dark'
-gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-light'
-gsettings set org.gnome.desktop.interface icon-theme 'Humanity-Dark'
-gsettings set org.gnome.desktop.interface icon-theme 'Humanity'
-
-gsettings set org.gnome.desktop.interface icon-theme 'gnome'
-gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-dark'
-gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-light'
+gsettings set "$gsettings_key" "$img_file"
