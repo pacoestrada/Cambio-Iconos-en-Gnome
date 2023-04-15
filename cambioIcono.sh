@@ -29,17 +29,26 @@ fi
 # Obtener el nombre del archivo sin la extensión
 app_name=$(basename "$app_file" .desktop)
 
-# Obtener la ruta de la aplicación
+# Obtener la ruta de la aplicación y ejecutarla
 app_path=$(grep -oP '(?<=^Exec=).*' "$app_file" | sed 's/%.//g;s/ .*$//g')
+eval "$app_path" &>/dev/null & disown
 
-# Ejecutar la aplicación
-gtk-launch "$app_name"
+# Esperar a que la aplicación se inicie completamente
+sleep 5
 
-# Pedir al usuario que ingrese la ruta del nuevo icono
-icon_str=$(zenity --file-selection --title="Seleccione un archivo de icono")
+# Encontrar la ventana de la aplicación recién iniciada
+win_str="$app_name"
+win_id=$(xdotool search --name "$win_str" | tail -1)
 
-# Cambiar el icono de la aplicación
-gio set "$app_file" metadata::custom-icon "file://$icon_str"
+# Mostrar una ventana de diálogo para elegir un archivo de imagen
+icon_path=$(zenity --file-selection --title="Seleccionar imagen" --file-filter="Archivos de imagen (*.png *.jpg *.jpeg *.ico) | *.png; *.jpg; *.jpeg; *.ico")
+if [ -z "$icon_path" ]; then
+    zenity --error --title="Error" --text="No se ha seleccionado ningún archivo de imagen."
+    exit 1
+fi
+
+# Cambiar el icono de la ventana de la aplicación
+xprop -id "$win_id" -f _NET_WM_ICON_NAME 8u -set _NET_WM_ICON_NAME "$icon_path"
 
 # Mostrar un mensaje de éxito
-zenity --info --title="Éxito" --text="La aplicación \"$app_name\" se ha iniciado correctamente y su icono ha sido cambiado a \"$icon_str\"."
+zenity --info --title="Éxito" --text="El icono de la aplicación \"$app_name\" se ha cambiado correctamente."
