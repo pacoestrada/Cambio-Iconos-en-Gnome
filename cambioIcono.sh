@@ -57,4 +57,5 @@ gsettings set org.gnome.desktop.interface icon-theme 'Humanity-Dark'
 gsettings set org.gnome.desktop.interface icon-theme 'Humanity'
 
 gsettings set org.gnome.desktop.interface icon-theme 'gnome'
-gsettings set org.gnome.desktop.interface icon-theme 'ubuntu
+gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-dark'
+gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-light'
