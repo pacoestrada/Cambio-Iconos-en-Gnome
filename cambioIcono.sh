@@ -32,16 +32,14 @@ app_name=$(basename "$app_file" .desktop)
 # Obtener la ruta de la aplicación
 app_path=$(grep -oP '(?<=^Exec=).*' "$app_file" | sed 's/%.//g;s/ .*$//g')
 
-# Obtener la ruta del icono
-icon_path=$(grep -oP '(?<=^Icon=).*' "$app_file" | sed 's/%.//g;s/ .*$//g')
+# Ejecutar la aplicación
+gtk-launch "$app_name"
+
+# Pedir al usuario que ingrese la ruta del nuevo icono
+icon_str=$(zenity --file-selection --title="Seleccione un archivo de icono")
 
 # Cambiar el icono de la aplicación
-gsettings set org.gnome.desktop.interface icon-theme "$(gsettings get org.gnome.desktop.interface icon-theme | sed "s/'//g")"
-gtk-update-icon-cache -f "$HOME/.icons/$(basename "$icon_path" .png)"
-sed -i "s#Icon=$icon_path#Icon=$HOME/.icons/$(basename "$icon_path" .png).svg#g" "$app_file"
-
-# Ejecutar la aplicación
-eval "$app_path" &>/dev/null & disown
+gio set "$app_file" metadata::custom-icon "file://$icon_str"
 
 # Mostrar un mensaje de éxito
-zenity --info --title="Éxito" --text="La aplicación \"$app_name\" se ha iniciado correctamente."
+zenity --info --title="Éxito" --text="La aplicación \"$app_name\" se ha iniciado correctamente y su icono ha sido cambiado a \"$icon_str\"."
