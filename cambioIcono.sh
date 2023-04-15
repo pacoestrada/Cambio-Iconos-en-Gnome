@@ -33,22 +33,28 @@ app_name=$(basename "$app_file" .desktop)
 app_path=$(grep -oP '(?<=^Exec=).*' "$app_file" | sed 's/%.//g;s/ .*$//g')
 eval "$app_path" &>/dev/null & disown
 
-# Esperar a que la aplicación se inicie completamente
-sleep 5
+# Pedir al usuario que seleccione un archivo de imagen
+img_file=$(zenity --file-selection --title="Seleccionar archivo de imagen para icono" --file-filter="Imágenes png|*.png")
 
-# Encontrar la ventana de la aplicación recién iniciada
-win_str="$app_name"
-win_id=$(xdotool search --name "$win_str" | tail -1)
+# Obtener la ruta del archivo .desktop de la aplicación
+desktop_file=$(grep -r -l "$app_path" /usr/share/applications | head -n 1)
 
-# Mostrar una ventana de diálogo para elegir un archivo de imagen
-icon_path=$(zenity --file-selection --title="Seleccionar imagen" --file-filter="Archivos de imagen (*.png *.jpg *.jpeg *.ico) | *.png; *.jpg; *.jpeg; *.ico")
-if [ -z "$icon_path" ]; then
-    zenity --error --title="Error" --text="No se ha seleccionado ningún archivo de imagen."
-    exit 1
-fi
+# Obtener la clave de gsettings para el icono de la aplicación
+gsettings_key=$(grep -oP '(?<=Icon=).*' "$desktop_file")
 
-# Cambiar el icono de la ventana de la aplicación
-xprop -id "$win_id" -f _NET_WM_ICON_NAME 8u -set _NET_WM_ICON_NAME "$icon_path"
+# Establecer el nuevo icono con gsettings
+gsettings set org.gnome.desktop.interface icon-theme 'Adwaita'
+gsettings set org.gnome.desktop.interface icon-theme 'gnome'
+gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-dark'
+gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-light'
+gsettings set org.gnome.desktop.interface icon-theme 'Humanity-Dark'
+gsettings set org.gnome.desktop.interface icon-theme 'Humanity'
 
-# Mostrar un mensaje de éxito
-zenity --info --title="Éxito" --text="El icono de la aplicación \"$app_name\" se ha cambiado correctamente."
+gsettings set org.gnome.desktop.interface icon-theme 'gnome'
+gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-dark'
+gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-light'
+gsettings set org.gnome.desktop.interface icon-theme 'Humanity-Dark'
+gsettings set org.gnome.desktop.interface icon-theme 'Humanity'
+
+gsettings set org.gnome.desktop.interface icon-theme 'gnome'
+gsettings set org.gnome.desktop.interface icon-theme 'ubuntu
