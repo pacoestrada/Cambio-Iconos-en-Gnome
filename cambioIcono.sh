@@ -19,7 +19,7 @@ else
         app_name=$(basename "$app_file" .desktop)
         options+=(FALSE "$app_name")
     done
-    app_index=$(zenity --list --title="Múltiples aplicaciones encontradas" --text="Seleccione una aplicación:" --radiolist "${options[@]}")
+    app_index=$(zenity --list --title="Múltiples aplicaciones encontradas" --text="Seleccione una aplicación:" --column="Selección" --column="Aplicación" --radiolist "${options[@]}")
     if [ -z "$app_index" ]; then
         exit 1
     fi
