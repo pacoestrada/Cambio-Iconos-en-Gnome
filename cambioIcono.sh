@@ -29,8 +29,18 @@ fi
 # Obtener el nombre del archivo sin la extensión
 app_name=$(basename "$app_file" .desktop)
 
-# Obtener la ruta de la aplicación y ejecutarla
+# Obtener la ruta de la aplicación
 app_path=$(grep -oP '(?<=^Exec=).*' "$app_file" | sed 's/%.//g;s/ .*$//g')
+
+# Obtener la ruta del icono
+icon_path=$(grep -oP '(?<=^Icon=).*' "$app_file" | sed 's/%.//g;s/ .*$//g')
+
+# Cambiar el icono de la aplicación
+gsettings set org.gnome.desktop.interface icon-theme "$(gsettings get org.gnome.desktop.interface icon-theme | sed "s/'//g")"
+gtk-update-icon-cache -f "$HOME/.icons/$(basename "$icon_path" .png)"
+sed -i "s#Icon=$icon_path#Icon=$HOME/.icons/$(basename "$icon_path" .png).svg#g" "$app_file"
+
+# Ejecutar la aplicación
 eval "$app_path" &>/dev/null & disown
 
 # Mostrar un mensaje de éxito
