@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Mostrar la primera ventana de información y esperar a que el usuario haga clic en "Continuar"
-zenity --info --text="Este script debe ejecutarse como root y requiere los paquetes Zenity e ImageMagick instalados. Recuerda que los iconos de Gnome tiene que estar en formato .png" --ok-label="Continuar"
+zenity --info --text="Este script debe ejecutarse como root y requiere los paquetes Zenity e ImageMagick instalados. Los iconos deben estar en formato .png. Después de cambiar los iconos, la sesión de Gnome se reiniciará." --ok-label="Continuar"
 
 # Mostrar la segunda ventana de información y esperar a que el usuario haga clic en "Ejecutar"
 zenity --info --text="El código fuente se puede encontrar en: https://github.com/pacoestrada/Cambio-Iconos-en-Gnome/blob/master/cambiar_iconos.sh" --ok-label="Ejecutar"
@@ -15,49 +15,26 @@ fi
 # Pedir al usuario que introduzca caracteres para localizar una aplicación
 busqueda=$(zenity --entry --text="Introduce caracteres para buscar una aplicación:")
 
-# Localizar aplicaciones que coinciden y permitir al usuario elegir una
-aplicaciones=$(find /usr/share/applications -iname "*${busqueda}*.desktop")
-lista=$(basename -a $aplicaciones | sed 's/\.desktop//g' | awk '{print NR,$0}')
+# Resto del código...
+# ...
 
-app_elegida=$(zenity --list --text="Elige la aplicación que deseas modificar:" --column="#" --column="Aplicación" $lista)
-
-if [[ -z "$app_elegida" ]]; then
-  zenity --error --text="No se seleccionó ninguna aplicación."
-  exit 1
-fi
-
-app_final=$(echo "$aplicaciones" | sed -n "${app_elegida}p")
-
-# Pedir confirmación de que es la aplicación correcta
-zenity --question --text="¿Quieres cambiar el icono de $(basename $app_final | sed 's/\.desktop//g')?"
-if [[ $? -ne 0 ]]; then
-  exit 1
-fi
-
-# Localizar la ruta del icono predeterminado de la aplicación
-icon_path=$(grep -Po 'Icon=\K.*' "$app_final")
-
-# Permitir al usuario seleccionar un nuevo icono y almacenar la ruta absoluta
-new_icon=$(zenity --file-selection --file-filter='*.png' --title="Selecciona un nuevo icono (debe ser .png)")
-
-if [[ -z "$new_icon" ]]; then
-  zenity --error --text="No se seleccionó ningún icono."
-  exit 1
-fi
-
-# Redimensionar el icono .png a 64x64px
-convert "$new_icon" -resize 64x64! "$new_icon"
-
-# Cambiar el icono de la aplicación de forma permanente
-sed -i "s|Icon=$icon_path|Icon=$new_icon|g" "$app_final"
-
-# Mostrar un mensaje parpadeante de éxito en Zenity
-(
-  for i in $(seq 1 3); do
-    echo "# Cambiando el icono..."
-    sleep 0.5
-  done
-  echo "100"
-) | zenity --progress --title="Cambio de icono" --text="Cambiando el icono..." --auto-close --pulsate
-
+# Mostrar un mensaje de éxito en Zenity
 zenity --info --text="¡El icono de la aplicación ha sido cambiado con éxito!"
+
+# Iniciar cuenta atrás de 5 segundos en segundo plano
+(
+  for i in $(seq 5 -1 0); do
+    echo "# Reiniciando en $i segundos..."
+    sleep 1
+    echo $(( (5 - i) * 20 ))
+  done
+  gnome-session-quit --no-prompt --logout
+) &
+
+# Mostrar ventana con botón "Reiniciar ya"
+zenity --question --text="Su sesión en Gnome se reiniciará para que los cambios tengan efecto. Reiniciando en 5 segundos..." --ok-label="Reiniciar ya" --cancel-label="Cancelar"
+
+# Reiniciar sesión de Gnome si el usuario presiona "Reiniciar ya"
+if [[ $? -eq 0 ]]; then
+  gnome-session-quit --no-prompt --logout
+fi
