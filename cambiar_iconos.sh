@@ -60,8 +60,9 @@ sed -i "s|Icon=$icon_path|Icon=$new_icon|g" "$app_final"
   echo "100"
 ) | zenity --progress --title="Cambio de icono" --text="Cambiando el icono..." --auto-close --pulsate
 
-zenity --info --text="¡El icono ha sido cambiado con éxito! . Debes REINICIAR la sesión de GNOME, para que los cambios tengan efecto.
+zenity --info --text="¡El icono ha sido cambiado con éxito! . Debes REINICIAR la sesión de GNOME, para que los cambios tengan efecto."
 
+fi
 
 #systemctl restart gdm
 
