@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Mostrar la primera ventana de información y esperar a que el usuario haga clic en "Continuar"
-zenity --info --text="Este script debe ejecutarse como root y requiere los paquetes Zenity e ImageMagick instalados." --ok-label="Continuar"
+zenity --info --text="Este script debe ejecutarse como root y requiere los paquetes Zenity e ImageMagick instalados. Recuerda que los iconos de Gnome tiene que estar en formato .png" --ok-label="Continuar"
 
 # Mostrar la segunda ventana de información y esperar a que el usuario haga clic en "Ejecutar"
 zenity --info --text="El código fuente se puede encontrar en: https://github.com/pacoestrada/Cambio-Iconos-en-Gnome/blob/master/cambiar_iconos.sh" --ok-label="Ejecutar"
