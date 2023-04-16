@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Mostrar la primera ventana de información y esperar a que el usuario haga clic en "Continuar"
+zenity --info --text="Este script debe ejecutarse como root y requiere los paquetes Zenity e ImageMagick instalados." --ok-label="Continuar"
+
+# Mostrar la segunda ventana de información y esperar a que el usuario haga clic en "Ejecutar"
+zenity --info --text="El código fuente se puede encontrar en: https://github.com/pacoestrada/Cambio-Iconos-en-Gnome/blob/master/cambiar_iconos.sh" --ok-label="Ejecutar"
+
 # Comprobar si el script se ejecuta como root
 if [[ $EUID -ne 0 ]]; then
   zenity --error --text="Por favor, ejecuta este script como root."
@@ -39,8 +45,8 @@ if [[ -z "$new_icon" ]]; then
   exit 1
 fi
 
-# Redimensionar el icono .png a 32x32px
-convert "$new_icon" -resize 32x32! "$new_icon"
+# Redimensionar el icono .png a 64x64px
+convert "$new_icon" -resize 64x64! "$new_icon"
 
 # Cambiar el icono de la aplicación de forma permanente
 sed -i "s|Icon=$icon_path|Icon=$new_icon|g" "$app_final"
@@ -55,4 +61,3 @@ sed -i "s|Icon=$icon_path|Icon=$new_icon|g" "$app_final"
 ) | zenity --progress --title="Cambio de icono" --text="Cambiando el icono..." --auto-close --pulsate
 
 zenity --info --text="¡El icono de la aplicación ha sido cambiado con éxito!"
-
